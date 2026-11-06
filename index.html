@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КАРТА РУССКОГО РЭПА</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg: #090909;
+    --white: #eeeeeb;
+    --muted: #777;
+    --red: #b51f2a;
+    --line: rgba(190, 190, 190, .38);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Manrope', sans-serif;
+    overflow-x: hidden;
+}
+
+button {
+    font: inherit;
+}
+
+header {
+    position: fixed;
+    z-index: 30;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 78px;
+    padding: 0 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(#090909 55%, transparent);
+    pointer-events: none;
+}
+
+.logo {
+    pointer-events: auto;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.05;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.logo span {
+    color: var(--red);
+}
+
+nav {
+    display: flex;
+    gap: 28px;
+    pointer-events: auto;
+}
+
+.nav-button {
+    border: 0;
+    background: none;
+    color: #888;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: color .2s;
+}
+
+.nav-button:hover {
+    color: white;
+}
+
+/* КАРТА — ЭТО НЕ ОТДЕЛЬНАЯ СТРАНИЦА, А ФРАГМЕНТ БОЛЬШОГО ПОЛЯ */
+
+.map-fragment {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 650px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at 51% 48%, rgba(115, 22, 29, .12), transparent 37%),
+        #090909;
+}
+
+/* Сетка карты */
+
+.map-fragment::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .18;
+    background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 65px 65px;
+    mask-image: radial-gradient(ellipse at center, black, transparent 85%);
+}
+
+/* Координаты и служебные подписи */
+
+.map-label {
+    position: absolute;
+    color: #555;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+.label-top {
+    top: 115px;
+    left: 5%;
+}
+
+.label-bottom {
+    bottom: 35px;
+    right: 5%;
+    text-align: right;
+}
+
+.map-coordinates {
+    position: absolute;
+    bottom: 35px;
+    left: 5%;
+    color: #444;
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+/* SVG С ЛИНИЯМИ, УХОДЯЩИМИ ЗА ГРАНИЦЫ */
+
+.connections {
+    position: absolute;
+    inset: -15%;
+    width: 130%;
+    height: 130%;
+    overflow: visible;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.connection {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.1;
+    vector-effect: non-scaling-stroke;
+}
+
+.connection.main {
+    stroke: rgba(181, 31, 42, .8);
+    stroke-width: 1.5;
+}
+
+.connection.secondary {
+    stroke: rgba(190,190,190,.22);
+    stroke-dasharray: 4 7;
+}
+
+.map-node {
+    fill: #090909;
+    stroke: #888;
+    stroke-width: 1.2;
+}
+
+.map-node.red {
+    stroke: var(--red);
+}
+
+.map-node-text {
+    fill: #777;
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
+
+/* ЦЕНТРАЛЬНЫЙ УЗЕЛ — ТЁМНЫЙ ПРИНЦ */
+
+.artist-node {
+    position: absolute;
+    z-index: 5;
+    left: 51%;
+    top: 49%;
+    transform: translate(-50%, -50%);
+    width: 245px;
+    text-align: center;
+}
+
+.artist-image {
+    width: 220px;
+    height: 270px;
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid rgba(181,31,42,.7);
+    background: #151515;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 0 55px rgba(0,0,0,.7);
+    transition: .35s;
+}
+
+.artist-image:hover {
+    border-color: #e0444d;
+    box-shadow: 0 0 45px rgba(181,31,42,.22);
+    transform: scale(1.035);
+}
+
+.artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(35%);
+    transition: .35s;
+}
+
+.artist-image:hover img {
+    filter: grayscale(0%);
+}
+
+.artist-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 17px;
+}
+
+.artist-type {
+    color: var(--red);
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 7px;
+}
+
+.node-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--red);
+    border-radius: 50%;
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px var(--red);
+}
+
+/* ДОПОЛНИТЕЛЬНЫЕ УЗЛЫ КАРТЫ */
+
+.ghost-node {
+    position: absolute;
+    z-index: 3;
+    color: #686868;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.ghost-node::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 9px;
+    border: 1px solid #777;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.ghost-1 { left: 8%; top: 34%; }
+.ghost-2 { left: 22%; top: 75%; }
+.ghost-3 { right: 9%; top: 28%; }
+.ghost-4 { right: 13%; top: 77%; }
+.ghost-5 { left: 42%; top: 14%; }
+.ghost-6 { right: 38%; bottom: 8%; }
+
+.map-hint {
+    position: absolute;
+    z-index: 5;
+    right: 5%;
+    top: 115px;
+    color: #555;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+/* МОДАЛЬНОЕ ОКНО */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0,0,0,.88);
+    backdrop-filter: blur(9px);
+}
+
+.overlay.active {
+    display: flex;
+}
+
+.modal {
+    width: min(760px, 100%);
+    background: #101010;
+    border: 1px solid #333;
+    padding: 38px;
+    position: relative;
+    animation: appear .25s ease;
+}
+
+@keyframes appear {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #888;
+    background: none;
+    border: 0;
+    font-size: 29px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: white;
+}
+
+.modal-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 33px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.modal-subtitle {
+    color: #777;
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-top: 8px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+}
+
+.album-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+}
+
+.album-card {
+    border: 1px solid #292929;
+    background: #171717;
+    color: white;
+    padding: 0 0 17px;
+    text-align: left;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.album-card:hover {
+    border-color: var(--red);
+    transform: translateY(-4px);
+}
+
+.album-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+.album-card strong {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    margin: 15px 15px 4px;
+}
+
+.album-card span {
+    display: block;
+    color: #777;
+    font-size: 9px;
+    letter-spacing: 2px;
+    margin: 0 15px;
+    text-transform: uppercase;
+}
+
+/* СТРАНИЦЫ РЕЦЕНЗИЙ */
+
+.review-page {
+    display: none;
+    min-height: 100vh;
+    padding: 125px 8% 90px;
+    background:
+        radial-gradient(ellipse at 15% 20%, rgba(130,20,30,.09), transparent 40%),
+        #090909;
+}
+
+.review-page.active {
+    display: block;
+}
+
+.review-back {
+    border: 0;
+    background: none;
+    color: #888;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 45px;
+}
+
+.review-back:hover {
+    color: white;
+}
+
+.review-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 370px) minmax(0, 1fr);
+    gap: 65px;
+    align-items: start;
+}
+
+.review-cover {
+    width: 100%;
+    border: 1px solid #333;
+    position: sticky;
+    top: 35px;
+}
+
+.review-kicker {
+    color: var(--red);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+}
+
+.review-heading {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(38px, 5vw, 65px);
+    text-transform: uppercase;
+    line-height: 1.05;
+    margin-bottom: 30px;
+}
+
+.review-heading span {
+    color: var(--red);
+}
+
+.review-body {
+    color: #b8b8b8;
+    font-size: 14px;
+    line-height: 1.95;
+}
+
+.review-body p {
+    margin-bottom: 21px;
+}
+
+.review-body .lead {
+    color: #f1f1f1;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.7;
+    margin-bottom: 27px;
+}
+
+/* ПОДСКАЗКА */
+
+.toast {
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    bottom: 30px;
+    transform: translate(-50%, 20px);
+    padding: 15px 25px;
+    color: #111;
+    background: #eee;
+    font-size: 11px;
+    letter-spacing: 1px;
+    opacity: 0;
+    pointer-events: none;
+    transition: .25s;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+@media(max-width: 750px) {
+    header {
+        padding: 0 5%;
+    }
+
+    nav {
+        gap: 12px;
+    }
+
+    .nav-button {
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+
+    .artist-node {
+        left: 50%;
+        top: 50%;
+        width: 205px;
+    }
+
+    .artist-image {
+        width: 185px;
+        height: 230px;
+    }
+
+    .artist-title {
+        font-size: 23px;
+    }
+
+    .ghost-node {
+        font-size: 8px;
+    }
+
+    .ghost-1 { left: -5%; }
+    .ghost-2 { left: 2%; }
+    .ghost-3 { right: -4%; }
+    .ghost-4 { right: -3%; }
+
+    .map-hint {
+        top: 100px;
+        right: 5%;
+        font-size: 8px;
+    }
+
+    .review-page {
+        padding: 110px 6% 60px;
+    }
+
+    .review-layout {
+        grid-template-columns: 1fr;
+        gap: 35px;
+    }
+
+    .review-cover {
+        position: static;
+        max-width: 380px;
+    }
+}
+
+@media(max-width: 480px) {
+    header {
+        height: 70px;
+    }
+
+    nav {
+        gap: 9px;
+    }
+
+    .nav-button {
+        font-size: 7px;
+    }
+
+    .map-label,
+    .map-coordinates {
+        font-size: 7px;
+    }
+
+    .album-list {
+        grid-template-columns: 1fr;
+    }
+
+    .modal {
+        padding: 30px 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-title {
+        font-size: 27px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        КАРТА <span>РУССКОГО</span><br>РЭПА
+    </div>
+
+    <nav>
+        <button class="nav-button placeholder">О проекте</button>
+        <button class="nav-button placeholder">Артисты</button>
+        <button class="nav-button placeholder">Материалы</button>
+    </nav>
+</header>
+
+<!-- ФРАГМЕНТ БОЛЬШОЙ КАРТЫ -->
+
+<main>
+
+<section class="map-fragment" id="mapFragment">
+
+    <div class="map-label label-top">
+        Карта связей / Фрагмент 001
+    </div>
+
+    <div class="map-hint">
+        Исследуйте музыкальную карту
+    </div>
+
+    <div class="map-coordinates">
+        RUSSIAN RAP MAP / 001
+    </div>
+
+    <div class="map-label label-bottom">
+        Связи продолжаются за пределами карты →
+    </div>
+
+    <!-- ЛИНИИ ПРОДОЛЖАЮТСЯ ЗА ГРАНИЦЫ ЭКРАНА -->
+
+    <svg class="connections" viewBox="0 0 1300 900"
+         preserveAspectRatio="none"
+         aria-hidden="true">
+
+        <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8"
+                    refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6"
+                      fill="none" stroke="#b51f2a"
+                      stroke-width="1"/>
+            </marker>
+
+            <marker id="arrowGray" markerWidth="8" markerHeight="8"
+                    refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6"
+                      fill="none" stroke="#999"
+                      stroke-width="1"/>
+            </marker>
+        </defs>
+
+        <!-- Линии, входящие в узел артиста -->
+
+        <path class="connection main"
+              d="M -100 100 L 650 440"
+              marker-end="url(#arrow)"/>
+
+        <path class="connection"
+              d="M 200 -100 L 650 440"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection main"
+              d="M 1400 80 L 650 440"
+              marker-end="url(#arrow)"/>
+
+        <path class="connection"
+              d="M 1400 400 L 650 440"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection"
+              d="M -100 800 L 650 440"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection main"
+              d="M 250 1000 L 650 440"
+              marker-end="url(#arrow)"/>
+
+        <path class="connection"
+              d="M 1400 950 L 650 440"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection"
+              d="M 650 -100 L 650 440"
+              marker-end="url(#arrowGray)"/>
+
+        <!-- Линии, исходящие из узла артиста -->
+
+        <path class="connection main"
+              d="M 650 440 L -120 360"
+              marker-end="url(#arrow)"/>
+
+        <path class="connection"
+              d="M 650 440 L 1450 220"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection main"
+              d="M 650 440 L 1100 1000"
+              marker-end="url(#arrow)"/>
+
+        <path class="connection"
+              d="M 650 440 L 500 -100"
+              marker-end="url(#arrowGray)"/>
+
+        <path class="connection"
+              d="M 650 440 L -100 1000"
+              marker-end="url(#arrowGray)"/>
+
+        <!-- Вторичные связи между точками карты -->
+
+        <path class="connection secondary"
+              d="M -100 100 L 1400 950"/>
+
+        <path class="connection secondary"
+              d="M 200 -100 L 1400 800"/>
+
+        <path class="connection secondary"
+              d="M 1300 -100 L -100 800"/>
+
+        <!-- Узел артиста -->
+
+        <circle class="map-node red" cx="650" cy="440" r="9"/>
+        <circle class="map-node red" cx="650" cy="440" r="20"
+                opacity=".35"/>
+
+        <!-- Другие точки на линиях -->
+
+        <circle class="map-node" cx="180" cy="225" r="4"/>
+        <circle class="map-node" cx="1050" cy="260" r="4"/>
+        <circle class="map-node" cx="300" cy="720" r="4"/>
+        <circle class="map-node" cx="900" cy="750" r="4"/>
+        <circle class="map-node" cx="650" cy="130" r="4"/>
+
+    </svg>
+
+    <!-- НЕПОДПИСАННЫЕ УЗЛЫ ДРУГИХ АРТИСТОВ -->
+
+    <div class="ghost-node ghost-1">Другие артисты</div>
+    <div class="ghost-node ghost-2">Новая сцена</div>
+    <div class="ghost-node ghost-3">Музыкальные связи</div>
+    <div class="ghost-node ghost-4">Альтернативный рэп</div>
+    <div class="ghost-node ghost-5">SoundCloud</div>
+    <div class="ghost-node ghost-6">Дискография</div>
+
+    <!-- ЦЕНТРАЛЬНЫЙ УЗЕЛ -->
+
+    <div class="artist-node">
+        <div class="node-dot"></div>
+
+        <button class="artist-image" id="openAlbums"
+                aria-label="Открыть альбомы Тёмного Принца">
+            <img src="1.png" alt="Тёмный Принц">
+        </button>
+
+        <div class="artist-title">Тёмный Принц</div>
+        <div class="artist-type">Узел карты / артист</div>
+    </div>
+
+</section>
+
+<!-- РЕЦЕНЗИЯ: МРАЧНЫЕ ТРЕДЫ -->
+
+<section class="review-page" id="album1">
+
+    <button class="review-back" onclick="backToMap()">
+        ← Вернуться к карте
+    </button>
+
+    <div class="review-layout">
+
+        <img src="2.jpg" class="review-cover" alt="Мрачные треды">
+
+        <div>
+            <div class="review-kicker">Карта русского рэпа / Тёмный Принц</div>
+            <h1 class="review-heading">Мрачные <span>треды</span></h1>
+
+            <div class="review-body">
+
+                <p class="lead">
+                    Новое имя: Темный Принц «Мрачные треды»
+                </p>
+
+                <p>
+                    Представитель саундклауд-сцены, у которого есть совместные треки с Madk1d и Fortuna 812.
+                </p>
+
+                <p>
+                    Темный Принц представляет новую саундклауд-сцену. Вы могли слышать его совместный с Madk1d трек «Ты че обиделась». Есть у артиста и работа с другим выходцем из саундклауда Fortuna 812.
+                </p>
+
+                <p>
+                    «Мрачные треды» стали дебютным альбомом Темного Принца. На пластинке восемь треков, в том числе совместные работы с Silver Gloria и Ashleyrossmith, альтер-эго самого исполнителя.
+                </p>
+
+                <p>
+                    Каждая композиция напоминает отдельную мрачную историю, случайно найденную в одном из уголков интернета. В «Вклубе» звучит история о невзаимной любви, за которой можно наблюдать через чужие сторис. «Автозаправка» похожа на пугающую переписку со сталкером, которую кто-то выложил на форуме. А «Цветы» рассказывают о любовных чувствах, которые постепенно перестают казаться романтичными и приобретают тревожный оттенок.
+                </p>
+
+                <p>
+                    «Мрачные треды» напоминают подборку сетевых страшилок, где за каждым треком скрывается новая история, а за романтическими признаниями может обнаружиться что-то пугающее. Темный Принц собирает знакомые образы из интернет-культуры и превращает их в музыкальные зарисовки, в которых меланхолия соседствует с хоррором.
+                </p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- РЕЦЕНЗИЯ: MILITANTUM -->
+
+<section class="review-page" id="album2">
+
+    <button class="review-back" onclick="backToMap()">
+        ← Вернуться к карте
+    </button>
+
+    <div class="review-layout">
+
+        <img src="3.jpg" class="review-cover" alt="Militantum">
+
+        <div>
+            <div class="review-kicker">Карта русского рэпа / Тёмный Принц</div>
+            <h1 class="review-heading"><span>Militantum</span></h1>
+
+            <div class="review-body">
+
+                <p class="lead">
+                    Темный Принц выпустил "Militantum" — альбом, в котором детективный нуар встречается с интернет-гротеском
+                </p>
+
+                <p>
+                    В центре истории биполярный детектив, зомби и маньяк одновременно. Звучит как очередная безумная интернет-вселенная, и, пожалуй, именно так ее и стоит воспринимать.
+                </p>
+
+                <p>
+                    Второй альбом Темного Принца "Militantum" интересен прежде всего своим звучанием и текстовыми находками. Артист экспериментирует с электроникой, альтернативным роком и мелодичными поп-мотивами, создавая плотную и местами почти кинематографичную атмосферу. В текстах тоже хватает интересных решений. Образы, метафоры и сюжетные детали складываются в самостоятельный мир, который хочется разглядывать и расшифровывать.
+                </p>
+
+                <p>
+                    Правда, погружение в него дается непросто. Концепция альбома настолько гротескна, что временами начинает работать против самой музыки. Главный герой здесь биполярный детектив, зомби и маньяк в одном лице. Из-за нагромождения безумных образов происходящее сложно воспринимать всерьез, а следить за внутренней логикой истории еще сложнее. Впрочем, возможно, в этом и заключается часть замысла. "Militantum" не столько предлагает последовательный сюжет, сколько затягивает слушателя в пространство, где абсурд становится главным способом разговора с реальностью.
+                </p>
+
+                <p>
+                    В этом есть и любопытный культурный контекст. Темный Принц молодой артист, выросший на интернет-культуре 2010-х, когда начинающие авторы активно придумывали собственные вселенные и населяли их мутировавшими персонажами, хоррор-образами и намеренно преувеличенными историями. В этой эстетике смешивались аниме, видеоигры, мемы, альтернативная музыка и всевозможный сетевой фольклор. "Militantum" во многом продолжает именно эту традицию. Здесь чувствуется не столько стремление рассказать стройную историю, сколько желание создать максимально странный и узнаваемый авторский мир.
+                </p>
+
+                <p>
+                    Поэтому альбом одновременно отталкивает своей чрезмерностью и вызывает интерес. За чередой зомби, маньяков и прочих персонажей обнаруживается артист с собственным музыкальным почерком и живым воображением. Если не пытаться воспринимать "Militantum" как концептуальный роман, требующий внимательного следования за сюжетом, он оказывается куда более увлекательным.
+                </p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<!-- ОКНО С АЛЬБОМАМИ -->
+
+<div class="overlay" id="albumsModal">
+    <div class="modal">
+
+        <button class="modal-close" id="closeModal">×</button>
+
+        <h2 class="modal-title">Дискография</h2>
+        <p class="modal-subtitle">Тёмный Принц / Выберите альбом</p>
+
+        <div class="album-list">
+
+            <button class="album-card" onclick="openAlbum('album1')">
+                <img src="2.jpg" alt="Мрачные треды">
+                <strong>Мрачные треды</strong>
+                <span>Дебютный альбом</span>
+            </button>
+
+            <button class="album-card" onclick="openAlbum('album2')">
+                <img src="3.jpg" alt="Militantum">
+                <strong>Militantum</strong>
+                <span>Второй альбом</span>
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">Сайт в доработке</div>
+
+<script>
+const modal = document.getElementById('albumsModal');
+const artistMap = document.getElementById('mapFragment');
+const toast = document.getElementById('toast');
+
+let toastTimeout;
+
+function showToast() {
+    toast.classList.add('show');
+
+    clearTimeout(toastTimeout);
+
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2200);
+}
+
+// Открытие альбомов по нажатию на Тёмного Принца
+document.getElementById('openAlbums').addEventListener('click', () => {
+    modal.classList.add('active');
+});
+
+// Закрытие модального окна
+document.getElementById('closeModal').addEventListener('click', () => {
+    modal.classList.remove('active');
+});
+
+// Закрытие по клику за пределами окна
+modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        modal.classList.remove('active');
+    }
+});
+
+// Переход на рецензию
+function openAlbum(id) {
+    modal.classList.remove('active');
+    artistMap.style.display = 'none';
+
+    document.querySelectorAll('.review-page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Возврат к фрагменту карты
+function backToMap() {
+    document.querySelectorAll('.review-page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    artistMap.style.display = 'block';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Все остальные кнопки пока не работают
+document.querySelectorAll('.placeholder').forEach(button => {
+    button.addEventListener('click', showToast);
+});
+
+// Escape закрывает модальное окно
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        modal.classList.remove('active');
+    }
+});
+</script>
+
+</body>
+</html>
